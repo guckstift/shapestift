@@ -2,7 +2,7 @@
 function Cat (game)
 {
 	Sprite.call (this, game, {
-		texture: game.textures ["images/cat.png"],
+		texture: game.textures ["images/fatcat.png"],
 		tiling: [4,4],
 		origin: [0.5,  1],
 	});
@@ -26,14 +26,6 @@ Cat.prototype.update = function (dt)
 		case "running":
 			this.anitime += dt;
 			this.frame = 1 + (floor (this.anitime/125) % 6);
-			if (this.dir == "left") {
-				this.speed[0] = -200;
-				this.scale[0] = -1;
-			}
-			else if (this.dir == "right") {
-				this.speed[0] = +200;
-				this.scale[0] = +1;
-			}
 			//
 			if (this.game.world.getBlock ([this.pos[0], this.pos[1]]) == 0) {
 				this.startFalling ()
@@ -53,6 +45,18 @@ Cat.prototype.update = function (dt)
 				this.startStanding ();
 			}
 			break;
+	}
+	
+	if (this.dir == "left") {
+		this.speed[0] = -200;
+		this.scale[0] = -1;
+	}
+	else if (this.dir == "right") {
+		this.speed[0] = +200;
+		this.scale[0] = +1;
+	}
+	else if (this.dir == "middle") {
+		this.speed[0] = 0;
 	}
 	
 	//var catBox = this.bbox ();
@@ -134,6 +138,8 @@ Cat.prototype.startJumping = function ()
 
 Cat.prototype.run = function (dir)
 {
+	this.dir = dir;
+	
 	if (this.state == "standing") {
 		this.startRunning (dir);
 	}
@@ -141,6 +147,8 @@ Cat.prototype.run = function (dir)
 
 Cat.prototype.stopRun = function ()
 {
+	this.dir = "middle";
+	
 	if (this.state == "running") {
 		this.startStanding ();
 	}

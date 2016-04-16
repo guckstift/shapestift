@@ -25,6 +25,7 @@ MyGame.prototype.onPreload = function ()
 	this.load ("images/sky.jpg");
 	this.load ("images/soil.png");
 	this.load ("images/cat.png");
+	this.load ("images/fatcat.png");
 	
 	//this.load ("sounds/haken.ogg");
 }
@@ -35,7 +36,7 @@ MyGame.prototype.onPreloadDone = function ()
 	
 	this.sky = this.create.sprite ({
 		texture: "images/sky.jpg",
-		//origin: [0.5, 0.5],
+		origin: [0.5, 0.5],
 	});
 	
 	this.world = new World (this);
@@ -98,6 +99,7 @@ MyGame.prototype.onUpdate = function (dt)
 	
 	this.cat.update (dt);
 	this.camera.pos = this.cat.pos;
+	this.sky.pos = this.camera.pos;
 	this.camera.update ();
 }
 
