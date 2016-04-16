@@ -4,8 +4,19 @@ function World (game)
 	this.game = game;
 	
 	this.map = [
-		[1,1,1,0,0],
-		[0,0,0,1,1],
+		[1,1,1,0,0,0,0,0,0,0],
+		[1,1,1,0,0,0,0,0,0,0],
+		[1,1,1,0,0,0,0,0,0,0],
+		[1,1,1,0,0,0,0,1,0,0],
+		[1,1,1,0,0,0,0,1,0,0],
+		[1,1,1,1,1,1,1,1,0,0],
+		[1,1,1,0,0,0,0,0,0,1],
+		[1,1,1,0,0,0,0,0,0,1],
+	];
+	
+	this.size = [
+		this.map[0].length,
+		this.map.length,
 	];
 	
 	this.sprites = [];
@@ -28,4 +39,35 @@ World.prototype.draw = function ()
 		sprite.draw ();
 	});
 }
+
+World.prototype.getBlock = function (point)
+{
+	var mapCoord = [
+		floor (point[0] / 64),
+		floor (point[1] / 64),
+	];
+	
+	if (
+		mapCoord[0] < 0 || mapCoord[0] > this.size[0]-1 ||
+		mapCoord[1] < 0 || mapCoord[1] > this.size[1]-1
+	) {
+		return 0;
+	}
+	else {
+		return this.map [mapCoord[1]][mapCoord[0]];
+	}
+}
+
+World.prototype.isPointFree = function (point)
+{
+	var mapCoord = [
+		clamp (0, this.size[0]-1, floor (point[0] / 64)),
+		clamp (0, this.size[1]-1, floor (point[1] / 64)),
+	];
+	return this.map [mapCoord[1]][mapCoord[0]] == 0;
+}
+
+/*World.prototype.isBoxFree = function (box)
+{
+}*/
 

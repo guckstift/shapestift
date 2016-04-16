@@ -9,6 +9,7 @@ function Sprite (game, props)
 	this.scale = props.scale || [1, 1];
 	this.alpha = props.alpha || 1;
 	this.speed = props.speed || [0, 0];
+	this.accel =  props.accel || [0, 0];
 	this.tiling = props.tiling || [1, 1];
 	this.frame = props.frame || 0;
 	
@@ -69,7 +70,20 @@ Sprite.prototype.draw = function ()
 
 Sprite.prototype.update = function (dt)
 {
+	this.speed[0] += this.accel[0] * dt / 1000;
+	this.speed[1] += this.accel[1] * dt / 1000;
 	this.pos[0] += this.speed[0] * dt / 1000;
 	this.pos[1] += this.speed[1] * dt / 1000;
 }
+
+Sprite.prototype.bbox = function ()
+{
+	return [
+		(0 - this.origin[0]) * this.framesize[0] * abs(this.scale[0]) + this.pos[0],
+		(0 - this.origin[1]) * this.framesize[1] * abs(this.scale[1]) + this.pos[1],
+		(1 - this.origin[0]) * this.framesize[0] * abs(this.scale[0]) + this.pos[0],
+		(1 - this.origin[1]) * this.framesize[1] * abs(this.scale[1]) + this.pos[1],
+	];
+}
+
 
