@@ -22,24 +22,39 @@ subclass (MyGame, Game);
 
 MyGame.prototype.onPreload = function ()
 {
+	this.load ("images/sky.jpg");
+	this.load ("images/soil.png");
 	this.load ("images/cat.png");
+	
 	//this.load ("sounds/haken.ogg");
 }
 
 MyGame.prototype.onPreloadDone = function ()
 {
 	this.camera = this.create.screenCamera ();
+	
+	this.sky = this.create.sprite ({
+		texture: "images/sky.jpg",
+		//origin: [0.5, 0.5],
+	});
+	
+	this.world = new World (this);
+
 	this.cat = new Cat (this);
 }
 
 MyGame.prototype.onRender = function ()
 {
+	this.sky.draw ();
+	this.world.draw ();
 	this.cat.draw ();
 }
 
 MyGame.prototype.onUpdate = function (dt)
 {
 	this.cat.update (dt);
+	this.camera.pos = this.cat.pos;
+	this.camera.update ();
 }
 
 MyGame.prototype.onKeyDown = function (e)
@@ -53,6 +68,9 @@ MyGame.prototype.onKeyDown = function (e)
 		this.cat.startRunRight ();
 	}
 	else if (e.keyCode == this.ARROWDOWN) {
+	}
+	else if (e.keyCode == this.SPACE) {
+		this.cat.jump ();
 	}
 	
 	//this.sounds ["sounds/haken.ogg"].play ();

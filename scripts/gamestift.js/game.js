@@ -101,6 +101,7 @@ Game.prototype.meshFragShaderFile = "shaders/mesh.frag";
 Game.prototype.spriteVertShaderFile = "shaders/sprite.vert";
 Game.prototype.spriteFragShaderFile = "shaders/sprite.frag";
 
+Game.prototype.SPACE = 32;
 Game.prototype.ARROWDOWN = 40;
 Game.prototype.ARROWLEFT = 37;
 Game.prototype.ARROWRIGHT = 39;
@@ -296,7 +297,7 @@ Game.prototype.load = function (url)
 {
 	var self = this;
 	
-	if (fileExt (url) == "png") {
+	if (fileExt (url) == "png" || fileExt (url) == "jpg") {
 		var loadingObj = loadImage (url, function (img) {
 			self.textures [url] = self.create.texture (img);
 		});
