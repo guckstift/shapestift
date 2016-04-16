@@ -5,6 +5,7 @@ function Texture (game, img, width, height)
 	this.img = img;
 	this.width = width || img.width;
 	this.height = height || img.height;
+	this.size = [this.width, this.height];
 	
 	var gl = this.game.gl;
 	

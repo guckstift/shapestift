@@ -12,9 +12,9 @@ function main ()
 function MyGame ()
 {
 	Game.call (this, {
-		bgColor: [0, 0.5, 0.5, 1],
+		bgColor: [0, 0.25, 0.5, 1],
 		updateInterval: 4,
-		mode: "static",
+		mode: "fullsize",
 	});
 }
 
@@ -22,52 +22,48 @@ subclass (MyGame, Game);
 
 MyGame.prototype.onPreload = function ()
 {
-	this.load ("images/rainbow.png");
-	this.load ("sounds/haken.ogg");
+	this.load ("images/cat.png");
+	//this.load ("sounds/haken.ogg");
 }
 
 MyGame.prototype.onPreloadDone = function ()
 {
 	this.camera = this.create.screenCamera ();
-	this.hero = this.create.sprite ("images/rainbow.png");
+	this.cat = new Cat (this);
 }
 
 MyGame.prototype.onRender = function ()
 {
-	this.hero.draw ();
+	this.cat.draw ();
 }
 
 MyGame.prototype.onUpdate = function (dt)
 {
-	this.hero.update (dt);
+	this.cat.update (dt);
 }
 
 MyGame.prototype.onKeyDown = function (e)
 {
-	var v = 200;
-	
 	if (e.keyCode == this.ARROWLEFT) {
-		this.hero.vel[0] = -v;
+		this.cat.startRunLeft ();
 	}
 	else if (e.keyCode == this.ARROWUP) {
-		this.hero.vel[1] = -v;
 	}
 	else if (e.keyCode == this.ARROWRIGHT) {
-		this.hero.vel[0] = +v;
+		this.cat.startRunRight ();
 	}
 	else if (e.keyCode == this.ARROWDOWN) {
-		this.hero.vel[1] = +v;
 	}
-	this.sounds ["sounds/haken.ogg"].play ();
+	
+	//this.sounds ["sounds/haken.ogg"].play ();
 }
 
 MyGame.prototype.onKeyUp = function (e)
 {
 	if (e.keyCode == this.ARROWLEFT || e.keyCode == this.ARROWRIGHT) {
-		this.hero.vel[0] = 0;
+		this.cat.stopRun ();
 	}
 	else if (e.keyCode == this.ARROWUP || e.keyCode == this.ARROWDOWN) {
-		this.hero.vel[1] = 0;
 	}
 }
 

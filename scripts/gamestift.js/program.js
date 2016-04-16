@@ -67,7 +67,7 @@ Program.prototype.setUniform = function (uniform, values, count, type)
 {
 	uniform = this.getUniform (uniform);
 	values = typeof values == "number" ? [values] : values;
-	count = count || 1;
+	count = count || 1; // length of array
 	type = type || "float";
 	
 	var gl = this.game.gl;

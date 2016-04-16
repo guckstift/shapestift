@@ -1,19 +1,29 @@
 
-function Sprite (game, texture)
+//function Sprite (game, texture, cols, rows)
+function Sprite (game, props)
 {
 	this.game = game;
-	this.texture = texture;
-	this.pos = [0, 0];
-	this.origin = [0.5, 0.5];
-	this.scale = [1, 1];
-	this.alpha = 0.5;
-	this.vel = [0, 0];
+	this.texture = props.texture;
+	this.pos = props.pos || [0, 0];
+	this.origin = props.origin || [0, 0];
+	this.scale = props.scale || [1, 1];
+	this.alpha = props.alpha || 1;
+	this.speed = props.speed || [0, 0];
+	this.tiling = props.tiling || [1, 1];
+	this.frame = props.frame || 0;
+	
+	this.numframes = this.tiling[0] * this.tiling[1];
+	this.texsize = this.texture.size;
+	this.framesize = [
+		this.texsize[0] / this.tiling[0],
+		this.texsize[1] / this.tiling[1],
+	];
 	
 	this.verts = [
 		0, 0,
-		this.texture.width, 0,
-		this.texture.width, this.texture.height,
-		0, this.texture.height,
+		1, 0,
+		1, 1,
+		0, 1,
 	];
 	this.texCoords = [
 		0, 0,
@@ -42,19 +52,13 @@ Sprite.prototype.draw = function ()
 			aTexCoord: this.texCoordBuf,
 		},
 		uniforms: {
-			uPos: {
-				values: [
-					this.pos[0] - this.origin[0]*this.texture.width,
-					this.pos[1] - this.origin[1]*this.texture.height,
-				],
-				count: 1,
-				type: "float",
-			},
-			uAlpha: {
-				values: this.alpha,
-				count: 1,
-				type: "float",
-			},
+			uPos: {values: this.pos},
+			uSize: {values: this.framesize},
+			uOrigin: {values: this.origin},
+			uScale: {values: this.scale},
+			uTiling: {values: this.tiling},
+			uFrame: {values: this.frame},
+			uAlpha: {values: this.alpha},
 		},
 		textures: {
 			uTex: this.texture,
@@ -65,7 +69,7 @@ Sprite.prototype.draw = function ()
 
 Sprite.prototype.update = function (dt)
 {
-	this.pos[0] += this.vel[0] * dt / 1000;
-	this.pos[1] += this.vel[1] * dt / 1000;
+	this.pos[0] += this.speed[0] * dt / 1000;
+	this.pos[1] += this.speed[1] * dt / 1000;
 }
 

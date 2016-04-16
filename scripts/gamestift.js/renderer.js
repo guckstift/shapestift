@@ -23,6 +23,8 @@ Renderer.prototype.triangles = function (props)
 	}, this);
 	
 	_.each (uniforms, function (uniform, uniformName) {
+		uniform.count = uniform.count || 1;
+		uniform.type = uniform.type || "float";
 		program.setUniform (uniformName, uniform.values, uniform.count, uniform.type);
 	}, this);
 	

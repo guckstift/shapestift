@@ -41,8 +41,14 @@ Creator.prototype.screenCamera = function ()
 	return new ScreenCamera (this.game);
 }
 
-Creator.prototype.sprite = function (texture)
+Creator.prototype.sprite = function (props)
 {
-	return new Sprite (this.game, this.game.textures [texture]);
+	props = props || {};
+	
+	if ("texture" in props) {
+		props.texture = this.game.textures [props.texture];
+	}
+
+	return new Sprite (this.game, props);
 }
 
