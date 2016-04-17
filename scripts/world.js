@@ -51,7 +51,14 @@ MyGame.blockframes = {
 World.prototype.draw = function ()
 {
 	_.each (this.sprites, function (sprite) {
-		sprite.draw ();
+		if (
+			floor (sprite.pos[0]) + sprite.framesize[0] >= floor (game.camera.pos[0]) - game.size[0]/2 &&
+			floor (sprite.pos[0]) - sprite.framesize[1] <= floor (game.camera.pos[0]) + game.size[0]/2 &&
+			floor (sprite.pos[1]) + sprite.framesize[0] >= floor (game.camera.pos[1]) - game.size[1]/2 &&
+			floor (sprite.pos[1]) - sprite.framesize[1] <= floor (game.camera.pos[1]) + game.size[1]/2
+		) {
+			sprite.draw ();
+		}
 	});
 }
 

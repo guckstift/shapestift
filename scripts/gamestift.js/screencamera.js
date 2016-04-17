@@ -24,8 +24,8 @@ ScreenCamera.prototype.update = function ()
 	1));
 	
 	mat4.translate (this.view, this.view, vec3.fromValues (
-		-this.pos [0],
-		-this.pos [1],
+		-floor (this.pos [0]) +0.5,
+		-floor (this.pos [1])+0.5,
 	0));
 }
 

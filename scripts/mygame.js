@@ -17,7 +17,7 @@ function MyGame ()
 		bgColor: [0, 0.25, 0.5, 1],
 		updateInterval: 4,
 		mode: "fullsize",
-		updateInterval: 20,
+		updateInterval: 10,
 	});
 }
 
@@ -49,14 +49,13 @@ MyGame.prototype.onPreloadDone = function ()
 	this.level = _.map (this.texts ["levels/level.txt"].trim().split ("\n"), function (line) {
 		return _.map (line, function (block) {
 			return block;
-			//return MyGame.blockframes [block];
 		})
 	});
 	
 	this.world = new World (this, this.level);
 
 	this.cat = new Cat (this);
-	this.cat.pos = [32, -250];
+	this.cat.pos = [0, 0];
 }
 
 MyGame.prototype.onRender = function ()
@@ -68,6 +67,11 @@ MyGame.prototype.onRender = function ()
 
 MyGame.prototype.onUpdate = function (dt)
 {
+	//console.log (dt);
+	this.cat.update ();
+	this.camera.pos = this.cat.pos;
+	this.camera.update ();
+/*
 	if (this.keymap [this.ARROWLEFT]) {
 		this.cat.run ("left");
 	}
@@ -90,6 +94,7 @@ MyGame.prototype.onUpdate = function (dt)
 	this.camera.pos = this.cat.pos;
 	this.sky.pos = this.camera.pos;
 	this.camera.update ();
+*/
 }
 
 MyGame.prototype.onKeyDown = function (e)
