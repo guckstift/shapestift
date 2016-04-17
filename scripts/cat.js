@@ -1,11 +1,24 @@
 
 function Cat (game)
 {
+	this.texthin = game.textures ["images/cat.png"];
+	this.texfat = game.textures ["images/fatcat.png"];
+	
+	this.isfat = false;
+
 	Sprite.call (this, game, {
-		texture: game.textures ["images/fatcat.png"],
+		texture: this.texthin,
 		tiling: [4,4],
 		origin: [0.5,  1],
 	});
+	
+	this.thinspeed = 300;
+	this.thinjump = 900;
+	this.fatspeed = 150;
+	this.fatjump = 600;
+	this.fallaccel = 1700;
+	
+	this.fatremain = 0;
 	
 	this.startStanding ();
 }
@@ -19,7 +32,11 @@ Cat.prototype.update = function (dt)
 			this.accel = [0, 0];
 			this.speed = [0, 0];
 			//
-			if (this.game.world.getBlock ([this.pos[0], this.pos[1]]) == 0) {
+			if (
+				this.game.world.isPointFree ([this.pos[0]-64+27, this.pos[1]]) &&
+				this.game.world.isPointFree ([this.pos[0]+64-27, this.pos[1]]) &&
+				this.game.world.isPointFree ([this.pos[0], this.pos[1]])
+			) {
 				this.startFalling ()
 			}
 			break;
@@ -27,32 +44,63 @@ Cat.prototype.update = function (dt)
 			this.anitime += dt;
 			this.frame = 1 + (floor (this.anitime/125) % 6);
 			//
-			if (this.game.world.getBlock ([this.pos[0], this.pos[1]]) == 0) {
+			if (
+				this.game.world.isPointFree ([this.pos[0]-64+27, this.pos[1]]) &&
+				this.game.world.isPointFree ([this.pos[0]+64-27, this.pos[1]]) &&
+				this.game.world.isPointFree ([this.pos[0], this.pos[1]])
+			) {
 				this.startFalling ()
 			}
 			break;
 		case "jumping":
-			this.accel[1] = +800;
+			this.accel[1] = +this.fallaccel;
 			//
 			if (this.speed[1] > 0) {
 				this.startFalling ();
 			}
 			break;
 		case "falling":
-			this.accel[1] = +800;
+			this.accel[1] = +this.fallaccel;
 			//
-			if (this.game.world.getBlock ([this.pos[0], this.pos[1]]) != 0) {
+			if (! (
+				this.game.world.isPointFree ([this.pos[0]-64+27, this.pos[1]]) &&
+				this.game.world.isPointFree ([this.pos[0]+64-27, this.pos[1]]) &&
+				this.game.world.isPointFree ([this.pos[0], this.pos[1]]) )
+			) {
+				this.startStanding ();
+			}
+			break;
+		case "eating":
+			this.anitime += dt;
+			//
+			if (this.anitime >= 500) {
+				this.isfat = true;
+				this.fatremain = 5 * 1000;
+				this.texture = this.texfat;
+				this.game.world.setBlockAtPos ([
+					this.pos[0]+32*this.scale[0],
+					this.pos[1]-32,
+				], "y");
 				this.startStanding ();
 			}
 			break;
 	}
 	
+	if (this.state == "jumping" || this.state == "running") {
+		this.fatremain -= dt;
+		if (this.fatremain <= 0)  {
+			this.isfat = false;
+			this.fatremain = 0;
+			this.texture = this.texthin;
+		}
+	} 
+	
 	if (this.dir == "left") {
-		this.speed[0] = -200;
+		this.speed[0] = - (this.isfat ? this.fatspeed : this.thinspeed);
 		this.scale[0] = -1;
 	}
 	else if (this.dir == "right") {
-		this.speed[0] = +200;
+		this.speed[0] = + (this.isfat ? this.fatspeed : this.thinspeed);
 		this.scale[0] = +1;
 	}
 	else if (this.dir == "middle") {
@@ -63,29 +111,37 @@ Cat.prototype.update = function (dt)
 	
 	// position correction if terrain collision
 	
-	// wall to the left
-	if (this.game.world.getBlock ([this.pos[0]-64+27, this.pos[1]-1]) != 0) {
-		this.speed[0] = 0;//+ abs (this.speed[0]);
-		this.pos[0] ++;
-	}
+	var pos = this.pos;
 	
-	// wall to the right
-	if (this.game.world.getBlock ([this.pos[0]+64-27, this.pos[1]-1]) != 0) {
-		this.speed[0] = 0;//- abs (this.speed[0]);
-		this.pos[0] --;
-	}
-	
-	// wall to the top
-	if (this.game.world.getBlock ([this.pos[0], this.pos[1]-128+49-1]) != 0) {
-		this.pos[1] ++;
-	}
+	Sprite.prototype.update.call (this, dt);
 	
 	// wall to the bottom
-	if (this.game.world.getBlock ([this.pos[0], this.pos[1]-1]) != 0) {
+	while (!this.game.world.isPointFree ([this.pos[0], this.pos[1]-1])) {
+		this.speed[1] = 0;
 		this.pos[1] --;
 	}
 	
-	Sprite.prototype.update.call (this, dt);
+	if (this.state != "falling" && this.state != "jumping") {
+		// wall to the left
+		while (!this.game.world.isPointFree ([this.pos[0]-64+27, this.pos[1]-1])) {
+			this.speed[0] = 0;
+			this.accel[0] = 0;
+			this.pos[0] ++;
+		}
+
+		// wall to the right
+		while (!this.game.world.isPointFree ([this.pos[0]+64-27, this.pos[1]-1])) {
+			this.speed[0] = 0;
+			this.accel[0] = 0;
+			this.pos[0] --;
+		}
+	}
+		
+	// wall to the top
+	if (!this.game.world.isPointFree ([this.pos[0], this.pos[1]-128+49-1])) {
+		this.speed[1] = 0;
+		this.pos[1] ++;
+	}
 	
 	/*
 	if (this.state == "running") {
@@ -106,34 +162,47 @@ Cat.prototype.update = function (dt)
 
 Cat.prototype.startStanding = function ()
 {
-	console.log ("stand")
 	this.state = "standing";
 	this.frame = 0;
+	this.dir = "middle";
+	this.accel = [0, 0];
+	this.speed = [0, 0];
+	console.log (this.state)
 }
 
 Cat.prototype.startFalling = function ()
 {
-	console.log ("fall")
 	this.state = "falling";
 	this.frame = 8;
+	console.log (this.state)
 }
 
 Cat.prototype.startRunning = function (dir)
 {
-	console.log ("run")
 	this.state = "running";
 	this.frame = 1;
 	this.anitime = 0;
 	this.dir = dir;
+	this.accel = [0, 0];
+	this.speed = [0, 0];
+	console.log (this.state)
 }
 
 Cat.prototype.startJumping = function ()
 {
-	console.log ("jump");
 	this.state = "jumping";
 	this.frame = 7;
 	this.anitime = 0;
-	this.speed[1] = -500;
+	this.speed[1] = - (this.isfat ? this.fatjump : this.thinjump);
+	console.log (this.state);
+}
+
+Cat.prototype.startEating = function ()
+{
+	this.state = "eating";
+	this.frame = 9;
+	this.anitime = 0;
+	console.log (this.state);
 }
 
 Cat.prototype.run = function (dir)
@@ -161,78 +230,36 @@ Cat.prototype.jump = function ()
 	}
 }
 
-/*
-Cat.prototype.startStanding = function ()
+Cat.prototype.eat = function ()
 {
-	this.state = "standing";
-	this.anitime = 0;
+	if (this.state == "standing") {
+		if (this.game.world.getBlock ([
+			this.pos[0]+32*this.scale[0],
+			this.pos[1]-32,
+		]) == "x" && !this.isfat) {
+			this.startEating ();
+		}
+	}
 }
 
-Cat.prototype.startRunning = function (dir)
+Cat.prototype.bbox = function ()
 {
-	dir = dir || "left";
+	var bbox = Sprite.prototype.bbox.call (this);
 	
-	if (this.state != "running") {
-		this.state = "running";
-		this.frame = 1;
-		this.anitime = 0;
-		if (dir == "left") {
-			this.speed[0] = -200;
-			this.scale = [-1, 1];
-		}
-		else if (dir == "right") {
-			this.speed[0] = +200;
-			this.scale = [+1, 1];
-		}
-		console.log ("run");
-	}
+	return [
+		bbox[0] + 32,
+		bbox[1] + 53,
+		bbox[0] + 111,
+		bbox[3],
+	];
 }
 
-Cat.prototype.stopRunning = function ()
+Cat.prototype.collision = function ()
 {
-	if (this.state == "running") {
-		this.state = "standing";
-		this.speed[0] = 0;
-		this.frame = 0;
-		this.anitime = 0;
-		console.log ("stop");
-	}
-	else if (this.state == "jumping" || this.state == "falling") {
-		this.speed[0] = 0;
-		console.log ("stop in air");
-	}
+	//var res = [false, false;
+	var bbox = this.bbox ();
+	
+	//if (!this.game.world.isPointFree ([bbox[0]
 }
 
-Cat.prototype.startJumping = function ()
-{
-	if (this.state == "standing" || this.state == "running") {
-		this.state = "jumping";
-		this.speed[1] = -600;
-		this.frame = 7;
-		this.anitime = 0;
-		console.log ("jump");
-	}
-}
-
-Cat.prototype.startFalling = function ()
-{
-	if (this.state != "falling") {
-		this.state = "falling";
-		this.frame = 8;
-		this.anitime = 0;
-		console.log ("fall");
-	}
-}
-
-Cat.prototype.land = function ()
-{
-	if (this.state == "falling") {
-		this.state = "standing";
-		this.speed = [0, 0];
-		this.frame = 0;
-		this.anitime = 0;
-		console.log ("land");
-	}
-}
-*/
 

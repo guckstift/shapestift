@@ -1,37 +1,52 @@
 
-function World (game)
+function World (game, map)
 {
 	this.game = game;
 	
-	this.map = [
-		[1,1,1,0,0,0,0,0,0,0],
-		[1,1,1,0,0,0,0,0,0,0],
-		[1,1,1,1,0,0,0,0,0,0],
-		[1,1,1,0,1,0,0,1,1,1],
-		[1,1,1,0,0,1,0,1,0,0],
-		[1,1,1,1,1,1,1,1,0,0],
-		[1,1,1,0,0,0,0,0,0,1],
-		[1,1,1,0,0,0,0,0,0,1],
-	];
+	this.map = map;
 	
 	this.size = [
 		this.map[0].length,
 		this.map.length,
 	];
 	
+	this.spritemap = new Array (this.size[1]);
+	for(var i=0; i<this.size[0]; i++) {
+		this.spritemap[i] = new Array (this.size[0]);
+	}
+	
 	this.sprites = [];
 	
 	for (var y=0; y<this.map.length; y++) {
 		for (var x=0; x<this.map[y].length; x++) {
-			if (this.map[y][x] == 1) {
-				this.sprites.push (this.game.create.sprite ({
-					texture: "images/soil.png",
-					pos: [x * 64, y * 64],
-				}));
+			if (this.map[y][x] == "x" || this.map[y][x] == "y") {
+				var pos = [x * 64, y * 64 + 6];
+			}
+			else {
+				var pos = [x * 64, y * 64];
+			}
+			if (this.map[y][x] != 0) {
+				var sprite = this.game.create.sprite ({
+					texture: "images/tiles.png",
+					pos: pos,
+					tiling: [8,8],
+					frame: MyGame.blockframes [this.map[y][x]],
+				});
+				this.sprites.push (sprite);
+				this.spritemap[y][x] = sprite;
 			}
 		}
 	}
 }
+
+MyGame.blockframes = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+	"3": 3,
+	"x": 32,
+	"y": 33,
+};
 
 World.prototype.draw = function ()
 {
@@ -58,16 +73,31 @@ World.prototype.getBlock = function (point)
 	}
 }
 
-World.prototype.isPointFree = function (point)
+World.prototype.setBlockAtPos = function (point, v)
 {
 	var mapCoord = [
-		clamp (0, this.size[0]-1, floor (point[0] / 64)),
-		clamp (0, this.size[1]-1, floor (point[1] / 64)),
+		floor (point[0] / 64),
+		floor (point[1] / 64),
 	];
-	return this.map [mapCoord[1]][mapCoord[0]] == 0;
+	
+	if (
+		mapCoord[0] < 0 || mapCoord[0] > this.size[0]-1 ||
+		mapCoord[1] < 0 || mapCoord[1] > this.size[1]-1
+	) {
+		return;
+	}
+	else {
+		this.map [mapCoord[1]][mapCoord[0]] = v;
+		if (this.spritemap [mapCoord[1]][mapCoord[0]].frame) {
+			this.spritemap [mapCoord[1]][mapCoord[0]].frame = MyGame.blockframes [v];
+		}
+	}
 }
 
-/*World.prototype.isBoxFree = function (box)
+World.prototype.isPointFree = function (point)
 {
-}*/
+	var block = this.getBlock (point);
+	return block == 0 || isNaN (parseInt (block)) ||
+		(block == 3 && this.game.cat.isfat);
+}
 

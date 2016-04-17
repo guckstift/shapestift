@@ -53,7 +53,7 @@ Sprite.prototype.draw = function ()
 			aTexCoord: this.texCoordBuf,
 		},
 		uniforms: {
-			uPos: {values: this.pos},
+			uPos: {values: [floor (this.pos[0]), floor (this.pos[1])]},
 			uSize: {values: this.framesize},
 			uOrigin: {values: this.origin},
 			uScale: {values: this.scale},

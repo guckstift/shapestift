@@ -11,10 +11,13 @@ function main ()
 
 function MyGame ()
 {
+	this.keymap = {};
+	
 	Game.call (this, {
 		bgColor: [0, 0.25, 0.5, 1],
 		updateInterval: 4,
 		mode: "fullsize",
+		updateInterval: 20,
 	});
 }
 
@@ -24,8 +27,12 @@ MyGame.prototype.onPreload = function ()
 {
 	this.load ("images/sky.jpg");
 	this.load ("images/soil.png");
+	this.load ("images/food.png");
+	this.load ("images/tiles.png");
 	this.load ("images/cat.png");
 	this.load ("images/fatcat.png");
+	
+	this.load ("levels/level.txt");
 	
 	//this.load ("sounds/haken.ogg");
 }
@@ -39,10 +46,17 @@ MyGame.prototype.onPreloadDone = function ()
 		origin: [0.5, 0.5],
 	});
 	
-	this.world = new World (this);
+	this.level = _.map (this.texts ["levels/level.txt"].trim().split ("\n"), function (line) {
+		return _.map (line, function (block) {
+			return block;
+			//return MyGame.blockframes [block];
+		})
+	});
+	
+	this.world = new World (this, this.level);
 
 	this.cat = new Cat (this);
-	this.cat.pos = [250, 250];
+	this.cat.pos = [32, -250];
 }
 
 MyGame.prototype.onRender = function ()
@@ -54,48 +68,23 @@ MyGame.prototype.onRender = function ()
 
 MyGame.prototype.onUpdate = function (dt)
 {
-	/*
-	var catBox = this.cat.bbox ();
-	
-	if (
-		this.world.isPointFree ([catBox[0]+32, catBox[3]]) &&
-		this.world.isPointFree ([catBox[0]+93, catBox[3]])
-		&& this.cat.state != "falling"
-		&& this.cat.state != "jumping"
-	) {
-		this.cat.startFalling ();
+	if (this.keymap [this.ARROWLEFT]) {
+		this.cat.run ("left");
+	}
+	else if (this.keymap [this.ARROWRIGHT]) {
+		this.cat.run ("right");
+	}
+	else {
+		this.cat.stopRun ();
 	}
 	
-	if (
-		this.world.isPointFree ([catBox[0]+32, catBox[3]])==false ||
-		this.world.isPointFree ([catBox[0]+93, catBox[3]])==false
-	) {
-		this.cat.land ();
-		//this.cat.pos[1] --;
-		var catBox = this.cat.bbox ();
-		// this.cat.pos[1] = floor (this.cat.pos[1] / 64) * 64; 
-	}
-
-	if (
-		(this.world.isPointFree ([catBox[0]+16, catBox[1]+54])==false ||
-		this.world.isPointFree ([catBox[0]+34, catBox[1]+126])==false)
-		&& this.cat.speed[0] < 0
-	) {
-		this.cat.speed[0] = 0;
-		//this.cat.pos[0] ++;
-		var catBox = this.cat.bbox ();
-		//this.cat.stopRun ();
-		//this.cat.pos[0] = ceil (this.cat.pos[1] / 64) * 64; 
+	if (this.keymap [this.ARROWDOWN]) {
+		this.cat.eat ();
 	}
 	
-	if (!this.world.isPointFree ([catBox[2]-16, catBox[3]-16]) && this.cat.speed[0] > 0) {
-		this.cat.speed[0] = 0;
-		//this.cat.pos[0] --;
-		var catBox = this.cat.bbox ();
-		//this.cat.stopRun ();
-		//this.cat.pos[0] = ceil (this.cat.pos[1] / 64) * 64; 
+	if (this.keymap [this.ARROWUP] || this.keymap [this.SPACE]) {
+		this.cat.jump ();
 	}
-	*/
 	
 	this.cat.update (dt);
 	this.camera.pos = this.cat.pos;
@@ -105,37 +94,12 @@ MyGame.prototype.onUpdate = function (dt)
 
 MyGame.prototype.onKeyDown = function (e)
 {
-	if (e.keyCode == this.ARROWLEFT) {
-		//this.cat.pos[0] -= 10;
-		this.cat.run ("left");
-		//this.cat.startRunning ("left");
-	}
-	else if (e.keyCode == this.ARROWUP) {
-		//this.cat.pos[1] -= 10;
-	}
-	else if (e.keyCode == this.ARROWRIGHT) {
-		//this.cat.pos[0] += 10;
-		this.cat.run ("right");
-		//this.cat.startRunning ("right");
-	}
-	else if (e.keyCode == this.ARROWDOWN) {
-		//this.cat.pos[1] += 10;
-	}
-	else if (e.keyCode == this.SPACE) {
-		this.cat.jump ();
-		//this.cat.startJumping ();
-	}
-	
-	//this.sounds ["sounds/haken.ogg"].play ();
+	this.keymap [e.keyCode] = true;
 }
 
 MyGame.prototype.onKeyUp = function (e)
 {
-	if (e.keyCode == this.ARROWLEFT || e.keyCode == this.ARROWRIGHT) {
-		this.cat.stopRun ();
-	}
-	else if (e.keyCode == this.ARROWUP || e.keyCode == this.ARROWDOWN) {
-	}
+	this.keymap [e.keyCode] = false;
 }
 
 function boxCollision (boxa, boxb)
