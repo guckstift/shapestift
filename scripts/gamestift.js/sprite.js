@@ -44,28 +44,35 @@ function Sprite (game, props)
 
 Sprite.prototype.draw = function ()
 {
-	this.game.draw.triangles ({
-		count: 2,
-		program: this.game.programs ["sprite-prog"],
-		camera: this.game.cameras ["screen-cam"],
-		buffers: {
-			aVert: this.vertBuf,
-			aTexCoord: this.texCoordBuf,
-		},
-		uniforms: {
-			uPos: {values: [floor (this.pos[0]), floor (this.pos[1])]},
-			uSize: {values: this.framesize},
-			uOrigin: {values: this.origin},
-			uScale: {values: this.scale},
-			uTiling: {values: this.tiling},
-			uFrame: {values: this.frame},
-			uAlpha: {values: this.alpha},
-		},
-		textures: {
-			uTex: this.texture,
-		},
-		indexBuf: this.indexBuf,
-	});
+	if (
+		floor (this.pos[0]) + this.framesize[0] >= floor (this.game.camera.pos[0]) - this.game.size[0]/2 &&
+		floor (this.pos[0]) - this.framesize[1] <= floor (this.game.camera.pos[0]) + this.game.size[0]/2 &&
+		floor (this.pos[1]) + this.framesize[0] >= floor (this.game.camera.pos[1]) - this.game.size[1]/2 &&
+		floor (this.pos[1]) - this.framesize[1] <= floor (this.game.camera.pos[1]) + this.game.size[1]/2
+	) {
+		this.game.draw.triangles ({
+			count: 2,
+			program: this.game.programs ["sprite-prog"],
+			camera: this.game.cameras ["screen-cam"],
+			buffers: {
+				aVert: this.vertBuf,
+				aTexCoord: this.texCoordBuf,
+			},
+			uniforms: {
+				uPos: {values: [floor (this.pos[0]), floor (this.pos[1])]},
+				uSize: {values: this.framesize},
+				uOrigin: {values: this.origin},
+				uScale: {values: this.scale},
+				uTiling: {values: this.tiling},
+				uFrame: {values: this.frame},
+				uAlpha: {values: this.alpha},
+			},
+			textures: {
+				uTex: this.texture,
+			},
+			indexBuf: this.indexBuf,
+		});
+	}
 }
 
 Sprite.prototype.update = function (dt)

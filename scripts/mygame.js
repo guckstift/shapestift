@@ -16,7 +16,8 @@ function MyGame ()
 	Game.call (this, {
 		bgColor: [0, 0.25, 0.5, 1],
 		updateInterval: 4,
-		mode: "fullsize",
+		mode: "static",
+		size: [1024, 768],
 		updateInterval: 10,
 	});
 }
@@ -55,7 +56,7 @@ MyGame.prototype.onPreloadDone = function ()
 	this.world = new World (this, this.level);
 
 	this.cat = new Cat (this);
-	this.cat.pos = [0, 0];
+	this.cat.pos = [64*5, 64*2];
 }
 
 MyGame.prototype.onRender = function ()
@@ -67,34 +68,10 @@ MyGame.prototype.onRender = function ()
 
 MyGame.prototype.onUpdate = function (dt)
 {
-	//console.log (dt);
 	this.cat.update ();
+	this.sky.pos = this.cat.pos;
 	this.camera.pos = this.cat.pos;
 	this.camera.update ();
-/*
-	if (this.keymap [this.ARROWLEFT]) {
-		this.cat.run ("left");
-	}
-	else if (this.keymap [this.ARROWRIGHT]) {
-		this.cat.run ("right");
-	}
-	else {
-		this.cat.stopRun ();
-	}
-	
-	if (this.keymap [this.ARROWDOWN]) {
-		this.cat.eat ();
-	}
-	
-	if (this.keymap [this.ARROWUP] || this.keymap [this.SPACE]) {
-		this.cat.jump ();
-	}
-	
-	this.cat.update (dt);
-	this.camera.pos = this.cat.pos;
-	this.sky.pos = this.camera.pos;
-	this.camera.update ();
-*/
 }
 
 MyGame.prototype.onKeyDown = function (e)
